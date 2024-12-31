@@ -1,3 +1,14 @@
+// Blynk
+#define BLYNK_TEMPLATE_ID " "
+#define BLYNK_TEMPLATE_NAME " "
+#define BLYNK_AUTH_TOKEN " "
+#include <BlynkSimpleEsp8266.h>
+
+// Wifi
+#include <ESP8266WiFi.h>
+const char* ssid = "name_wifi";
+const char* password = "password_wifi";
+
 // Pin untuk LED
 int red = 2; // D4 = GPIO2
 
@@ -14,6 +25,12 @@ DHT dht(DHTPIN, DHTTYPE);
 #define FLAME_SENSOR 14
 
 void setup() {
+  // Wifi
+  WiFi.begin(ssid, password) ;
+
+  // Blynk
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, password);
+
   // Serial
   Serial.begin(9600);
   Serial.println("NodeMCU On");
@@ -33,6 +50,8 @@ void setup() {
 }
 
 void loop() {
+  // Blynk
+  Blynk.run();
 
   // membaca nilai analog dari sensor MQ-2
   int gasValue = analogRead(sensorMQ);
@@ -44,12 +63,14 @@ void loop() {
   // membaca data flame sensor
   int flameValue=digitalRead(FLAME_SENSOR);
 
+
   // cek validity mq 2
   if (isnan(gasValue)) {
     Serial.println("Sensor MQ-2 tidak Terbaca");
   } else {
     Serial.print("Gas Value :");
     Serial.println(gasValue);
+    Blynk.virtualWrite(V9, gasValue); //blynk
   }
 
   // cek validity (dht);
@@ -63,6 +84,8 @@ void loop() {
     Serial.print("Kelembapan :");
     Serial.print(lembap);
     Serial.println("%");
+    Blynk.virtualWrite(V7, temperature); //blynk
+    Blynk.virtualWrite(V8, lembap); //blynk
   }
 
   // cek validity flame sensor
